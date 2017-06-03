@@ -41,7 +41,17 @@ At every time step we
 
 * Obtain "waypoints" from the simulator showing our preferred path forward
 * Fit a "guidewire" quadratic curve to these points
-* Create a nonlinear optimization problem with constraints as follows:
+
+This guidewire shows an optimal path forward.  We then construct a set of equations
+that form a nonlinear optimization problem, where we seek an optimal selection of
+_a_ and _delta_ values over time that minimizes a total "cost."
+Given an optimal plan forward, we return the initial throttle _a_ and steering _delta_
+as input to our simulated actuators.
+
+### Nonlinear constraints
+
+The constraints are as follows:
+
 * We create N sets of simultaneous equations, one for each timestep dt
 * For adjacent timesteps t and t+1, we constrain values using Newtonian mechanics:
 
@@ -53,11 +63,7 @@ cte(t+1) = cte + v*sin(epsi)*dt
 epsi(t+1) = epsi + (1/Lf)*v*delta*dt
 ```
 
-* We specify a "cost" to choosing values for a and delta.
-* We run an optimizer to choose a sequence of throttle _a_ and steering changes _delta_
-over all N steps that minimizes total cost.
-* Given an optimal plan forward, we return the initial throttle _a_ and steering _delta_
-as input to our simulated actuators.
+### Cost function
 
 The cost function is a weighted sum of several factors.  The weights were initially
 uniform (1).  Through experimentation we observed optimal paths had numerous
@@ -71,7 +77,6 @@ The cost function includes the following factors:
 against a desired speed of 50mph, steering of 0, and track error of 0.
 * Our chosen steering and throttle values for each time step, squared
 * Our changes between adjacent time steps for steering and throttle, squared 
-
 
 ## Timestep length & duration
 
