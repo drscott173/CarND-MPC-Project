@@ -1,6 +1,124 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+## Compilation
+
+1. Install all dependencies (below)
+2. Clone this repo.
+3. Make a build directory: `mkdir build && cd build`
+4. Compile: `cmake .. && make`
+5. Run it: `./mpc`.
+
+## Simulation
+
+![alt](https://img.youtube.com/vi/Gq_VPqJBU6c/hqdefault.jpg)
+
+The video seen [here](https://www.youtube.com/watch?v=Gq_VPqJBU6c) shows our 
+car driving around the track with a speed limited to 50mph.  The yellow lines
+indicate the "waypoints" from the simulator showing a preferred path forward.
+The green lines and dots show an optimal path predicted by our model
+controller.
+
+## The Model
+
+We use a kinematic model for car's state with five variables:
+
+* _x, y_ position
+* velocity _v_
+* heading _psi_
+* turn rate _epsi_
+* cross-track error _cte_
+	
+Cross track error refers to the distance we're to the left or right of the
+center line.
+	
+Our model ignores dynamics such as momentum, road conditions, tire patch dynamics
+on the road surface, and wind resistance.  These very well might be part of a
+model in production.
+
+We model two actuators to affect car's performance on the track:
+
+* Steering adjustment (-1 to 1), _delta_, varying +/- 25 degrees
+* Throttle adjustment (-1 to 1), _a_, varying from full power reverse to full power forward
+	
+At every time step we
+
+* Obtain "waypoints" from the simulator showing our preferred path forward
+* Fit a "guidewire" quadratic curve to these points
+* Create a nonlinear optimization problem with constraints as follows:
+* We create N sets of simultaneous equations, one for each timestep dt
+* For adjacent timesteps t and t+1, we constrain values using Newtonian mechanics:
+
+```
+x(t+1) = x(t) + v*cos(psi)*dt
+y(t+1) = y(t) + v*sin(psi)*d5
+v(t+1) = v(t) + a*dt
+cte(t+1) = cte + v*sin(epsi)*dt
+epsi(t+1) = epsi + (1/Lf)*v*delta*dt
+```
+
+* We specify a "cost" to choosing values for a and delta.
+* We run an optimizer to choose a sequence of throttle (a) and steering changes (delta)
+over all N steps that minimizes total cost.
+* Given an optimal plan forward, we return the initial throttle (a) and steering (delta)
+as input to our simulated actuators.
+
+The cost function is a weighted sum of several factors.  The weights are all chosen
+to be uniform (1) initially.  We observed behavior and found that the paths had numerous
+twists and turns which, while optimal, produces instability.  We penalized changes in
+steering direction by a factor of 1e6, and values of steering by a factor of 100.  This 
+was sufficient to navigate the track at a speed limit of 50mph.
+
+The cost function includes the following factors:
+
+* The squared difference between our current speed, steering, and cross track error
+against a desired speed of 50mph, steering of 0, and track error of 0.
+* Our chosen steering and throttle values for each time step, squared
+* Our changes between adjacent time steps for steering and throttle, squared 
+
+
+## Timestep length & duration
+
+We chose to model one second forward in time, 100 (_N_) simulated steps of 10 (_dt_) milliseconds each.  Fewer
+steps were insufficient to model behavior at tight corners, which led to instability.  
+Larger values of N provided little if any improvement
+to the prediction of the next throttle _a_ and steering angle _delta_. 
+
+The timestep _dt_ was set intuitively as 1/10th of the latency of 100ms.  We found that even smaller timesteps
+may more accurately predict a path forward, but that the end result was marginally better while introducing
+additional computational cost.  Larger timesteps began to degrade performance of the vehicle, largely through
+excess correction of steering and more braking and accelerating.
+
+
+## Polynomial Fitting & Preprocessing
+
+We accepted waypoints as-is.  We did notice waypoints degraded over time, particularly at
+higher speeds and around twisted sections of road.  A better approach could mitigate these errors by
+averaging waypoints between subsequent timesteps, perhaps using a sliding average to stabilize
+changes.
+
+We fit a 2-degree polynomial to the waypoints, which we used as an optimal path forward
+for our vehicle.  Higher degrees were at times more accurate.  However,
+we witnessed overfitting at higher speeds that caused unnatural behaviors such as rapid changes between
+accelerating and braking, or constant adjustments of the steering wheel.  The higher dimensional 
+paths also seemed erratic with oscillation.
+
+We guided our model to use a strive for a velocity of 50mph, with no cross track error
+and a straight heading.  We constrained our turning radius to +/- 25 degrees, then normalized
+these values to the interval [-1, 1] before sending to the simulator. 
+We found that we had to invert the predicted steering angle, as apparently
+this value was subtracted vs. added to the current heading in the simulator.  
+
+## Model with Latency
+
+We account for latency by assuming the current car drifts at the current speed, heading,
+and rate of turn for the entire interval forward.  These become the initial state for our
+model.  Our algorithm then selects an optimal sequence of steering and throttle adjustments,
+100 times a second, for that time forward.  This is equivalent to looking ahead while you're
+driving, realizing you can't do that much about what's immediately in front of you at
+highway speeds.  Your decisions now affect your location, heading and speed
+a few feet in front of you, not where you are at the current instant.
+
 ---
 
 ## Dependencies
