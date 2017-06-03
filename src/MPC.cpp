@@ -40,14 +40,14 @@ double dt = .01;       // in seconds
 const double Lf = 2.67;
 
 // Both the reference cross track and orientation errors are 0.
-// The reference velocity is set to 40 mph.
+// The reference velocity is set to 50 mph.
 double ref_cte = 0;
 double ref_epsi = 0;
 double ref_v = 50;
 
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
-// when one variable starts and another ends to make our lifes easier.
+// when one variable starts and another ends to make our life easier.
 size_t x_start = 0;
 size_t y_start = x_start + N;
 size_t psi_start = y_start + N;
@@ -59,7 +59,7 @@ size_t a_start = delta_start + N - 1;
 
 //
 // Create several constants k to either emphasize
-// or demphasize relative cost of items in our total
+// or deemphasize relative cost of items in our total
 // cost model. We found that penalizing changes in steering
 // over time, as well as initial changes in steering, were
 // most effective.
@@ -112,6 +112,7 @@ class FG_eval {
       //
       // We add 1 to each of the starting indices due to cost being located at
       // index 0 of `fg`.
+      //
       // This bumps up the position of all the other values.
       fg[1 + x_start] = vars[x_start];
       fg[1 + y_start] = vars[y_start];
