@@ -67,8 +67,8 @@ size_t a_start = delta_start + N - 1;
 const double k_cte           = 1;
 const double k_epsi          = 1;
 const double k_v             = 1;
-const double k_throttle  	 = 1;
-const double k_steering  	 = 100;
+const double k_throttle      = 1;
+const double k_steering      = 100;
 const double k_dthrottle     = 1;
 const double k_dsteering     = 1e6;
 
