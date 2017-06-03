@@ -88,11 +88,10 @@ We chose to model one second forward in time, 100 (_N_) simulated steps of 10 (_
 steps were insufficient to model behavior at tight corners, which led to instability.  Larger values
 of N provided little if any improvement to the prediction of the next throttle _a_ and steering angle _delta_. 
 
-The timestep _dt_ was set intuitively as 1/10th of the latency of 100ms.  We found that even smaller timesteps
-may more accurately predict a path forward, but that the end result was marginally better while introducing
-additional computational cost.  Larger timesteps began to degrade performance of the vehicle, largely through
-excess correction of steering and more braking and accelerating.
-
+The timestep _dt_ was set intuitively as 1/10th of the latency of 100ms.  Smaller timesteps
+more accurately predicted a path forward, but the end result was only marginally better at
+additional computational cost.  Larger timesteps degraded performance as the model was unable
+to accurately predict nuances in vehicle motion, leading to unstable conditions.
 
 ## Polynomial Fitting & Preprocessing
 
@@ -107,7 +106,7 @@ we witnessed overfitting at higher speeds that caused unnatural behaviors such a
 accelerating and braking, or constant adjustments of the steering wheel.  The higher dimensional 
 paths also seemed erratic with oscillation.
 
-We guided our model to use a strive for a velocity of 50mph, with no cross track error
+We guided our model to strive for a velocity of 50mph, with no cross track error
 and a straight heading.  We constrained our turning radius to +/- 25 degrees, then normalized
 these values to the interval [-1, 1] before sending to the simulator. 
 We found that we had to invert the predicted steering angle, as apparently
