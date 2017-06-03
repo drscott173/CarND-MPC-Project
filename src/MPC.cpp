@@ -3,6 +3,23 @@
 #include <cppad/ipopt/solve.hpp>
 #include "Eigen-3.3/Eigen/Core"
 
+//
+// NOTE
+//
+// The bulk of this code was written as part of the exercises
+// within the Udacity online course.  My contributions here were
+// adapting the code to waypoints being fed to us by a simulator,
+// introducing weighting to the cost function, and tweaking the
+// math to handle transformations between local and global coordinate
+// systems in the simulator.  I also upgraded the guidewire from a
+// 1-d to 2-d polynomial, cleaned up the code a bit, and returned
+// the predicted actuators and path forward from our Solve function.
+//
+// PS This would have been ne'er impossible without demo code showing
+// how to use the CppAD and IPopt packages for nonlinear optimization.
+// The forums were also helpful in dealing with latency.
+//
+
 using CppAD::AD;
 
 // We set the number of timesteps to 100 and the time
