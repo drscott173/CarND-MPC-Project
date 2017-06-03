@@ -32,7 +32,9 @@ We use a kinematic model for car's state with six variables:
 Cross track error _cte_ refers to the distance we're to the left or right of the
 center line. Our model ignores dynamics such as momentum, road conditions, tire patch dynamics
 on the road surface, and wind resistance.  These very well might be part of a
-model in production. We also model two actuators to drive the car around the track:
+model in production.
+
+We model two actuators to drive the car around the track:
 
 * Steering adjustment (-1 to 1), _delta_, varying +/- 25 degrees
 * Throttle adjustment (-1 to 1), _a_, varying from full power reverse to full power forward
@@ -43,8 +45,8 @@ At every time step we
 * Fit a "guidewire" quadratic curve to these points
 
 This guidewire shows an optimal path forward.  We then construct a set of equations
-that form a nonlinear optimization problem, where we seek an optimal selection of
-_a_ and _delta_ values over time that minimizes a total "cost."
+(below) that form a nonlinear optimization problem, where we seek an optimal selection of
+_a_ and _delta_ values over time that minimizes a total cost (also below).
 Given an optimal plan forward, we return the initial throttle _a_ and steering _delta_
 as input to our simulated actuators.
 
@@ -67,9 +69,11 @@ epsi(t+1) = epsi + (1/Lf)*v*delta*dt
 
 The cost function is a weighted sum of several factors.  The weights were initially
 uniform (1).  Through experimentation we observed optimal paths had numerous
-twists and turns which caused instability.  We penalized changes in
+twists and turns, leading to instability.  We penalized changes in
 steering direction by a factor of 1e6, and values of steering by a factor of 100.  This 
-was sufficient to navigate the track at a speed limit of 50mph.
+dampened the curves and was sufficient to navigate the track at a speed limit of 50mph.
+We note that higher speeds introduced further instability, often causing the car to
+veer off track. Limiting the speed allowed us to complete the project as designed.
 
 The cost function includes the following factors:
 
