@@ -13,7 +13,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 ![alt](https://img.youtube.com/vi/Gq_VPqJBU6c/hqdefault.jpg)
 
-The video seen [here](https://www.youtube.com/watch?v=Gq_VPqJBU6c) shows our 
+The [YouTube video seen here](https://www.youtube.com/watch?v=Gq_VPqJBU6c) shows our 
 car driving around the track with a speed limited to 50mph.  The yellow lines
 indicate the "waypoints" from the simulator showing a preferred path forward.
 The green lines and dots show an optimal path predicted by our model
@@ -21,7 +21,7 @@ controller.
 
 ## The Model
 
-We use a kinematic model for car's state with five variables:
+We use a kinematic model for car's state with six variables:
 
 * _x, y_ position
 * velocity _v_
@@ -29,14 +29,10 @@ We use a kinematic model for car's state with five variables:
 * turn rate _epsi_
 * cross-track error _cte_
 	
-Cross track error refers to the distance we're to the left or right of the
-center line.
-	
-Our model ignores dynamics such as momentum, road conditions, tire patch dynamics
+Cross track error _cte_ refers to the distance we're to the left or right of the
+center line. Our model ignores dynamics such as momentum, road conditions, tire patch dynamics
 on the road surface, and wind resistance.  These very well might be part of a
-model in production.
-
-We model two actuators to affect car's performance on the track:
+model in production. We also model two actuators to drive the car around the track:
 
 * Steering adjustment (-1 to 1), _delta_, varying +/- 25 degrees
 * Throttle adjustment (-1 to 1), _a_, varying from full power reverse to full power forward
@@ -58,14 +54,14 @@ epsi(t+1) = epsi + (1/Lf)*v*delta*dt
 ```
 
 * We specify a "cost" to choosing values for a and delta.
-* We run an optimizer to choose a sequence of throttle (a) and steering changes (delta)
+* We run an optimizer to choose a sequence of throttle _a_ and steering changes _delta_
 over all N steps that minimizes total cost.
-* Given an optimal plan forward, we return the initial throttle (a) and steering (delta)
+* Given an optimal plan forward, we return the initial throttle _a_ and steering _delta_
 as input to our simulated actuators.
 
-The cost function is a weighted sum of several factors.  The weights are all chosen
-to be uniform (1) initially.  We observed behavior and found that the paths had numerous
-twists and turns which, while optimal, produces instability.  We penalized changes in
+The cost function is a weighted sum of several factors.  The weights were initially
+uniform (1).  Through experimentation we observed optimal paths had numerous
+twists and turns which caused instability.  We penalized changes in
 steering direction by a factor of 1e6, and values of steering by a factor of 100.  This 
 was sufficient to navigate the track at a speed limit of 50mph.
 
@@ -80,9 +76,8 @@ against a desired speed of 50mph, steering of 0, and track error of 0.
 ## Timestep length & duration
 
 We chose to model one second forward in time, 100 (_N_) simulated steps of 10 (_dt_) milliseconds each.  Fewer
-steps were insufficient to model behavior at tight corners, which led to instability.  
-Larger values of N provided little if any improvement
-to the prediction of the next throttle _a_ and steering angle _delta_. 
+steps were insufficient to model behavior at tight corners, which led to instability.  Larger values
+of N provided little if any improvement to the prediction of the next throttle _a_ and steering angle _delta_. 
 
 The timestep _dt_ was set intuitively as 1/10th of the latency of 100ms.  We found that even smaller timesteps
 may more accurately predict a path forward, but that the end result was marginally better while introducing
